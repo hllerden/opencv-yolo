@@ -170,7 +170,9 @@ void Inference::loadOnnxNetwork()
     {
         std::cout << "\nRunning on CPU" << std::endl;
         net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
-        net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
+        net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU); // flaot 32
+        // net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA_FP16); // float16 bit
+
     }
 }
 
