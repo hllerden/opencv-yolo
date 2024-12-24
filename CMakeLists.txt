@@ -26,6 +26,7 @@ set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 add_executable(yoloExercise
   main.cpp
   inference.h inference.cpp
+  stalker.h stalker.cpp
 )
 target_link_libraries(yoloExercise      ${OpenCV_LIBS}
 )

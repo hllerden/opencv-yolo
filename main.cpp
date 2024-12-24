@@ -5,6 +5,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "inference.h"
+#include "stalker.h"
 
 using namespace std;
 using namespace cv;
@@ -80,6 +81,9 @@ int  readOnImage(){
 
 int main(int argc, char **argv)
 {
+
+        Stalker stalker;
+
     std::string projectBasePath = "/home/halilerden/Documents/workFiles/06-imageProcess/imageProcess/opencv-yolo"; // Set your ultralytics base path
 
     bool runOnGPU = true;
@@ -124,7 +128,14 @@ int main(int argc, char **argv)
 
         int detections = output.size();
         std::cout << "Number of detections:" << detections << std::endl;
+        // Detected bounding box'ları topluyoruz.
+        std::vector<cv::Rect> detectedBoxes;
+        for (int i = 0; i < detections; ++i) {
+            detectedBoxes.push_back(output[i].box);
+        }
 
+        // Stalker ile bounding box'ları işliyoruz.
+        std::vector<cv::Rect> trackedBoxes = stalker.processDetections(detectedBoxes);
 
         int carCountInPicture=0;
         for (int i = 0; i < detections; ++i)
@@ -141,11 +152,19 @@ int main(int argc, char **argv)
                 carCountInPicture++;
             }
 
-            // Detection box text
-            std::string classString = detection.className + ' ' + std::to_string(detection.confidence).substr(0, 4)+ ' '+ std::to_string(carCountInPicture).substr(0, 4);
+            // // Detection box text
+            // std::string classString = detection.className + ' ' + std::to_string(detection.confidence).substr(0, 4)+ ' '+ std::to_string(carCountInPicture).substr(0, 4);
+            // cv::Size textSize = cv::getTextSize(classString, cv::FONT_HERSHEY_DUPLEX, 1, 2, 0);
+            // cv::Rect textBox(box.x, box.y - 40, textSize.width + 10, textSize.height + 20);
+            // // std::cout << "class type:" << classString << std::endl;
+
+            // Takip bilgisi ve tespit bilgisi yazdır.
+            std::string classString = output[i].className + " " +
+                                      std::to_string(output[i].confidence).substr(0, 4) +
+                                      " ID: " + std::to_string(i);
             cv::Size textSize = cv::getTextSize(classString, cv::FONT_HERSHEY_DUPLEX, 1, 2, 0);
             cv::Rect textBox(box.x, box.y - 40, textSize.width + 10, textSize.height + 20);
-            // std::cout << "class type:" << classString << std::endl;
+
 
             cv::rectangle(frame, textBox, color, cv::FILLED);
             cv::putText(frame, classString, cv::Point(box.x + 5, box.y - 10), cv::FONT_HERSHEY_DUPLEX, 1, cv::Scalar(0, 0, 0), 2, 0);
